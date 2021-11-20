@@ -95,3 +95,29 @@ def solarDeclination(dayofyear1: int) -> float:
     temp2 = np.arcsin(0.39785 * temp2)
     return temp2
 
+
+def Zenith(lat: float, sD: float, te: float, sn: float) -> float:
+    """
+    Zenith angle approximation.
+
+    Parameters
+    ----------
+    lat : float
+        Latitude in radians.
+    sD : float
+        Solar declination angle in radians.
+    te : float
+        DESCRIPTION.
+    sn : float
+        Solar noon value.
+
+    Returns
+    -------
+    float
+        Zenith angle approximation at time te.
+    """
+    temp = (
+        np.sin(lat) * np.sin(sD) +
+        np.cos(lat) * np.cos(sD) * np.cos(15 * (te - sn) * np.pi / 180))
+    return np.arccos(temp)
+
