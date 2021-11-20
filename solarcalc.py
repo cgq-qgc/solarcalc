@@ -122,15 +122,15 @@ def Zenith(lat: float, sD: float, te: float, sn: float) -> float:
     return np.arccos(temp)
 
 
-def CalcHalfDayLength(solarD2: float, latitude2: float) -> float:
+def CalcHalfDayLength(solar_dec: float, lat_rad: float) -> float:
     """
     Calculation of 1/2 solar day length.
 
     Parameters
     ----------
-    solarD2 : float
+    solar_dec : float
         Solar Declination in radians.
-    latitude2 : float
+    lat_rad : float
         Latitude of site (field) in radians.
 
     Returns
@@ -138,8 +138,8 @@ def CalcHalfDayLength(solarD2: float, latitude2: float) -> float:
     float
         1/2 day length.
     """
-    temp3 = np.cos(90 * np.pi / 180) - np.sin(latitude2) * np.sin(solarD2)
-    temp3 = temp3 / (np.cos(solarD2) * np.cos(latitude2))
+    temp3 = np.cos(90 * np.pi / 180) - np.sin(lat_rad) * np.sin(solar_dec)
+    temp3 = temp3 / (np.cos(solar_dec) * np.cos(lat_rad))
     temp3 = (np.arccos(temp3) * 180 / np.pi) / 15
     return temp3
 
