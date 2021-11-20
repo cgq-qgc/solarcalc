@@ -122,7 +122,7 @@ def Zenith(lat: float, sD: float, te: float, sn: float) -> float:
     return np.arccos(temp)
 
 
-def CalcHalfDayLength(solar_dec: float, lat_rad: float) -> float:
+def calc_halfdaylength(solar_dec: float, lat_rad: float) -> float:
     """
     Calculation of 1/2 solar day length.
 
