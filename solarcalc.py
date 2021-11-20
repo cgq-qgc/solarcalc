@@ -164,7 +164,7 @@ def stefan_boltzman(airtemp: float):
 
 
 def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
-                   rain, deltaT, maxairtemp, minairtemp):
+                   rain, deltaT):
     """
     Predicts net radiation from only average temperature extremes
     and daily precipitation records.
@@ -187,9 +187,6 @@ def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
     # Convert lat and long to radian numbers.
     lat_rad = np.radians(lat_dd)
     lon_rad = np.radians(lon_dd)
-
-    # soil albedo (Avg = 0.15 or so)
-    albedo = 0.15
 
     datetime_ind = pd.date_range(
         start=datetime.datetime(yearofcalc, 1, 1),
@@ -252,8 +249,6 @@ def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
                 if deltaT[dayofyear] <= 10 and deltaT[dayofyear] != 0:
                     tao = tao / (11 - deltaT[dayofyear])
 
-            airtemp = (maxairtemp[dayofyear] + minairtemp[dayofyear]) / 2
-
             # Calculate the Zenith Angle.
             zangle = Zenith(lat_rad, solarD, time, solarnoon)
 
@@ -298,29 +293,11 @@ def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
             # Output calculated solar radiation (St) to data file.
             daily_solar_rad.append(St)
 
-            # Extra calculations.
+    return daily_solar_rad.append(St)
 
-            decday = dayofyear + (time / 24)
 
-            # Calculation of reflected radiation
-            Sr = albedo * St
-            
 
-            # Calucaltion of absorbed radiation (estimated)
-            Fp = np.cos(zangle)
 
-            La = stefan_boltzman(airtemp)
 
-            Fd = 1
 
-            Rabs = (1 - albedo) * (Fp * Sp + Fd * Sd) + 0.05 * La
-    daily_solar_rad.append(St)
-
-            
-            # along with delta T and tao -- used for debugging purposes only.
-# 				ModelOutput._day.setText(dayofyear+"");
-# 		        ModelOutput._sunrise.setText(pl2.format(sunrise)+"");
-# 		        ModelOutput._sunset.setText(pl2.format (sunset)+"");
-# 		        ModelOutput._solarnoon.setText(pl2.format(solarnoon)+"");
-# 		        ModelOutput._daylength.setText(pl2.format(halfdaylength*2)+"");
 
