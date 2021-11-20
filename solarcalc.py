@@ -48,3 +48,23 @@ def getET(dayofyear: int) -> float:
         19.3 * np.cos(3 * ETcalc)
         ) / 3600
 
+
+def getLC(long2: float):
+    """
+    Calculate the longitudal correction.
+
+    Parameters
+    ----------
+    long2 : float
+        longitude of fieldsite in radians. Negative value if West of meridian
+        and positive value if East of meridian.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+    """
+    # We assume longitude is in decimal format.
+    # Translates to 4 minutes for each degree
+    return long2 / 360 * 24
+
