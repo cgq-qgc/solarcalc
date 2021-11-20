@@ -68,3 +68,30 @@ def getLC(long2: float):
     # Translates to 4 minutes for each degree
     return long2 / 360 * 24
 
+
+def solarDeclination(dayofyear1: int) -> float:
+    """
+    Calculate the solar declination angle.
+
+    Formula from Campbell and Norman, 1998 [Eq. 11.2].
+    Corrected for day of year (Jan. 1 = 1, etc.)
+
+    Parameters
+    ----------
+    dayofyear : int
+        Day of year.
+
+    Returns
+    -------
+    temp2 : float
+        Solar declination angle in radians.
+
+    """
+    temp2 = (
+        278.97 + 0.9856 * dayofyear1 +
+        1.9165 * np.sin((356.6 + 0.9856 * dayofyear1) * np.pi / 180)
+        )
+    temp2 = np.sin(temp2 * np.pi / 180)
+    temp2 = np.arcsin(0.39785 * temp2)
+    return temp2
+
