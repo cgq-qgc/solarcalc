@@ -96,20 +96,21 @@ def solarDeclination(dayofyear1: int) -> float:
     return temp2
 
 
-def Zenith(lat: float, sD: float, te: float, sn: float) -> float:
+def Zenith(lat_rad: float, solar_dec: float, time: float,
+           solar_noon: float) -> float:
     """
     Zenith angle approximation.
 
     Parameters
     ----------
-    lat : float
+    lat_rad : float
         Latitude in radians.
-    sD : float
+    solar_dec : float
         Solar declination angle in radians.
-    te : float
-        DESCRIPTION.
-    sn : float
-        Solar noon value.
+    time : float
+        Time of the day in hours.
+    solar_noon : float
+        Solar noon value in hours.
 
     Returns
     -------
@@ -117,8 +118,9 @@ def Zenith(lat: float, sD: float, te: float, sn: float) -> float:
         Zenith angle approximation at time te.
     """
     temp = (
-        np.sin(lat) * np.sin(sD) +
-        np.cos(lat) * np.cos(sD) * np.cos(15 * (te - sn) * np.pi / 180))
+        np.sin(lat_rad) * np.sin(solar_dec) +
+        np.cos(lat_rad) * np.cos(solar_dec) *
+        np.cos(15 * (time - solar_noon) * np.pi / 180))
     return np.arccos(temp)
 
 
