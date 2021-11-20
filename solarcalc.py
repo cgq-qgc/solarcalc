@@ -143,3 +143,21 @@ def CalcHalfDayLength(solarD2: float, latitude2: float) -> float:
     temp3 = (np.arccos(temp3) * 180 / np.pi) / 15
     return temp3
 
+
+def stefan_boltzman(airtemp: float):
+    """
+    Return black body radiation in Watts/m2  emitted from body.
+
+    Parameters
+    ----------
+    airtemp : float
+        airtemp or temperature of body.
+
+    Returns
+    -------
+    float
+        Emitted radiation (W/m2).
+    """
+    return 5.67E-08 * np.power(airtemp + 273.16, 4)
+
+
