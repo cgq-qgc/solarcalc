@@ -296,8 +296,5 @@ def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
     return daily_solar_rad.append(St)
 
 
-
-
-
-
-
+if __name__ == '__main__':
+    pass
