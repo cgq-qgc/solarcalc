@@ -26,8 +26,8 @@ import pandas as pd
 
 def getET(dayofyear: int) -> float:
     """
-    Calculate the ET (equation of time) correction typically a 15-20 minute
-    correction depending on calendar day.
+    Calculate the Equation of Time correction (typically a 15-20 minutes
+    correction depending on calendar day).
 
     Parameters
     ----------
@@ -37,7 +37,7 @@ def getET(dayofyear: int) -> float:
     Returns
     -------
     float
-        Calculated ET value.
+        Calculated Equation of Time value in hours.
 
     """
     ETcalc = (279.575 + 0.9856 * dayofyear) * np.pi / 180
@@ -78,9 +78,6 @@ def calc_solar_declination(dayofyear: int) -> float:
     ------
     Equation 11.2 in Campbell, G.S. and J.M. Norman (1998). An Introduction to
     Environmental Biophysics.
-
-    Formula from Campbell and Norman, 1998 [Eq. 11.2].
-    Corrected for day of year (Jan. 1 = 1, etc.)
 
     Parameters
     ----------
@@ -140,6 +137,11 @@ def calc_halfdaylength(solar_dec: float, lat_rad: float) -> float:
     """
     Calculation of 1/2 solar day length.
 
+    Source
+    ------
+    Equation 11.6 in Campbell, G.S. and J.M. Norman (1998). An Introduction to
+    Environmental Biophysics.
+
     Parameters
     ----------
     solar_dec : float
@@ -150,12 +152,11 @@ def calc_halfdaylength(solar_dec: float, lat_rad: float) -> float:
     Returns
     -------
     float
-        1/2 day length.
+        1/2 day length in hours.
     """
-    temp3 = np.cos(90 * np.pi / 180) - np.sin(lat_rad) * np.sin(solar_dec)
-    temp3 = temp3 / (np.cos(solar_dec) * np.cos(lat_rad))
-    temp3 = (np.arccos(temp3) * 180 / np.pi) / 15
-    return temp3
+    A = np.cos(90 * np.pi / 180) - np.sin(lat_rad) * np.sin(solar_dec)
+    B = np.cos(lat_rad) * np.cos(solar_dec)
+    return np.arccos(A/B) * (180 / np.pi) / 15
 
 
 def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
