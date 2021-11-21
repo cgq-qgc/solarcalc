@@ -175,6 +175,13 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
     None.
 
     """
+    # Convert rain[day of year] = 1 if rain and rain = 0 if no rain.
+    rain = (climate_data['ptot'] > 1).values.astype(int)
+    deltaT = np.round((climate_data['tamax'] - climate_data['tamin']).values)
+
+    daily_solar_rad = []
+    tao_array = []
+
     # Convert lat and long to radian numbers.
     lat_rad = np.radians(lat_dd)
     lon_rad = np.radians(lon_dd)
@@ -203,7 +210,8 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         sunrise = solarnoon - halfdaylength
         sunset = solarnoon + halfdaylength
 
-        daily_solar_rad = []
+        # Approximatation of Sp.
+
         # tao is atmospheric transmission :
         # overcast = 0.4 --> from Liu and Jordan (1960)
         # clear = 0.70 --> as given in Gates (1980)
@@ -233,58 +241,48 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
                 tao = tao / (11 - deltaT[i])
 
         # Estimating direct and diffuse short wave radiation for each hour.
-        for time in range(24):
-            # Approximatation of Sp.
+        time = np.arange(24)
 
+        # Calculate the Zenith Angle.
+        zangle = Zenith(lat_rad, solarD, time, solarnoon)
 
+        # Estimation of diffuse radiation
 
+        # Liu, B.Y.H.; Jordan, R.C. The interrelationship and characteristic
+        # distribution of direct, diffuse and total solar radiation.
+        # Sol. Energy 1960, 4, 1–19.
 
+        # Sd is in Watts m^-2
 
+        Pa = 101 * np.exp(-1 * alt / 8200)
+        m = Pa / 101.3 / np.cos(zangle)
+        Spo = 1360  # Solar constant in W/m2
 
+        Sp = Spo * np.power(tao, m)
+        Sp[(time < sunrise) | (time > sunset)] = 0
 
+        # Beam irradiance on a horizontal surface.
+        Sb = Sp * np.cos(zangle)
 
-            Pa = 101 * np.exp(-1 * alt / 8200)
-            m = Pa / 101.3 / np.cos(zangle)
+        # Diffuse sky irradiance on horizontal plane (Sd)
+        # Formula given in Campbell and Norman (1998)
+        Sd = 0.3 * (1 - np.power(tao, m)) * np.cos(zangle) * Spo
+        Sd[(time < sunrise) | (time > sunset)] = 0
 
-            # Liu and Jordan (1960) Estimation of diffuse radiation
-            # Sd is in Watts m^-2
+        # The global solar radiation on a horizontal surface is the sum of the
+        # horizontal direct beam (Sb) and diffuse radiation (Sd).
+        St = Sb + Sd
 
-            # calcuate Sp :
-            Spo = 1360
-            if time < sunrise or time > sunset:
-                Sp = 0
-            else:
-                Sp = Spo * np.power(tao, m)
+        # Check for never daylight northern latitudes.
+        St[St < 0] = 0
 
-            # Diffuse sky irradiance on horizontal plane (Sd)
-            # calc using tao, m , and zangle.
-            # Formula given in Campbell and Norman (1998)
-            if time < sunrise or time > sunset:
-                Sd = 0
-            else:
-                Sd = 0.3 * (1 - np.power(tao, m)) * np.cos(zangle) * Spo
+        # Fill NaN values with zeros.
+        St[pd.isnull(St)] = 0
 
-            # Beam irradiance on a horizontal surface
-            if time < sunrise or time > sunset:
-                Sb = 0
-            else:
-                Sb = Sp * np.cos(zangle)
+        daily_solar_rad.extend(np.round(St, 2))
+        tao_array.extend(np.ones(24) * tao)
 
-            # Calcualte total (beam and diffuse) irradiance on a horizontal
-            # surface.
-            St = Sb + Sd
-
-            # Check for never daylight northern latitudes.
-            St = np.max(0, St)
-
-            # check for NaN values, set to zero if NaN.
-            if pd.isnull(St):
-                St = 0
-
-            # Output calculated solar radiation (St) to data file.
-            daily_solar_rad.append(St)
-
-    return daily_solar_rad.append(St)
+    return daily_solar_rad, tao_array
 
 
 if __name__ == '__main__':
