@@ -123,7 +123,7 @@ def calc_zenith_angle(lat_rad: float, solar_dec: float, time: float,
     zenith_angle : float
         Zenith angle approximation in radians.
     """
-    hour_angle = 15 * (solar_noon - time)
+    hour_angle = 15 * (time - solar_noon)
     zenith_angle = np.arccos(
         np.sin(lat_rad) * np.sin(solar_dec) +
         np.cos(lat_rad) * np.cos(solar_dec) *
