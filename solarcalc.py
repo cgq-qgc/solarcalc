@@ -133,7 +133,8 @@ def calc_zenith_angle(lat_rad: float, solar_dec: float, time: float,
     return zenith_angle
 
 
-def calc_halfdaylength(solar_dec: float, lat_rad: float) -> float:
+def calc_halfdaylength(solar_dec: float, lat_rad: float,
+                       twilight: bool = False) -> float:
     """
     Calculation of 1/2 solar day length.
 
@@ -148,13 +149,16 @@ def calc_halfdaylength(solar_dec: float, lat_rad: float) -> float:
         Solar Declination in radians.
     lat_rad : float
         Latitude of site (field) in radians.
+    twilight : bool
+        Whether to include twilight in the half day lenght calculation.
 
     Returns
     -------
     float
         1/2 day length in hours.
     """
-    A = np.cos(90 * np.pi / 180) - np.sin(lat_rad) * np.sin(solar_dec)
+    psi = 96 if twilight else 90
+    A = np.cos(psi * np.pi / 180) - np.sin(lat_rad) * np.sin(solar_dec)
     B = np.cos(lat_rad) * np.cos(solar_dec)
     return np.arccos(A/B) * (180 / np.pi) / 15
 
