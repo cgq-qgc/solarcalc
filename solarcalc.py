@@ -97,10 +97,15 @@ def solarDeclination(dayofyear1: int) -> float:
     return temp2
 
 
-def Zenith(lat_rad: float, solar_dec: float, time: float,
-           solar_noon: float) -> float:
+def calc_zenith_angle(lat_rad: float, solar_dec: float, time: float,
+                      solar_noon: float) -> float:
     """
     Zenith angle approximation.
+
+    Source
+    ------
+    Equation 11.1 in Campbell, G.S. and J.M. Norman (1998). An Introduction to
+    Environmental Biophysics.
 
     Parameters
     ----------
@@ -184,7 +189,7 @@ def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
 
         # Calculate LC correction to solar noon (hours) needs
         # longitude correction for location of field site.
-        LC = getLC(lon_dd)
+        LC = getLC(lon_rad)
 
         # Gets correction for ET.
         ET = getET(dayofyear)
@@ -236,8 +241,6 @@ def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
                 if deltaT[dayofyear] <= 10 and deltaT[dayofyear] != 0:
                     tao = tao / (11 - deltaT[dayofyear])
 
-            # Calculate the Zenith Angle.
-            zangle = Zenith(lat_rad, solarD, time, solarnoon)
 
             Pa = 101 * np.exp(-1 * alt / 8200)
             m = Pa / 101.3 / np.cos(zangle)
