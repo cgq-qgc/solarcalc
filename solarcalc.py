@@ -204,38 +204,43 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         sunset = solarnoon + halfdaylength
 
         daily_solar_rad = []
+        # tao is atmospheric transmission :
+        # overcast = 0.4 --> from Liu and Jordan (1960)
+        # clear = 0.70 --> as given in Gates (1980)
+        tao = 0.70
+
+        # If it is raining then assume it is overcast (cloud cover).
+        if rain[i] == 1:
+            tao = 0.40
+
+        # If it has been raining for two days then even
+        # darker (denser cloud cover).
+        if rain[i] == 1 and rain[i - 1] == 1:
+            # Note that we cannot asses this condition for the first day
+            # of the climate serie.
+            tao = 0.30
+
+        # Assign pre-rain days to 80% of tao value ?
+        if rain[i] == 0 and rain[i - 1] == 1:
+            # Note that we cannot assess this condition for the last day of
+            # the climate data series.
+            tao = 0.60
+
+        # If airtemperature rise is less than 10 --> lower tao value
+        # unless by poles
+        if np.abs(lat_dd) < 60:
+            if deltaT[i] <= 10 and deltaT[i] != 0:
+                tao = tao / (11 - deltaT[i])
+
         # Estimating direct and diffuse short wave radiation for each hour.
         for time in range(24):
             # Approximatation of Sp.
 
-            # tao is atmospheric transmission :
-            # overcast = 0.4 --> from Liu and Jordan (1960)
-            # clear = 0.70 --> as given in Gates (1980)
-            tao = 0.70
 
-            # If it is raining then assume it is overcast (cloud cover).
-            if rain[dayofyear] == 1:
-                tao = 0.40
 
-            # If it has been raining for two days then even
-            # darker (denser cloud cover).
-            if (rain[dayofyear] == 1 and rain[dayofyear - 1] == 1):
-                tao = 0.30
 
-            # Assign pre-rain days to 80% of tao value ?
 
-            # (comment added by JSG)
-            # TODO: I think there is an error here. It should be
-            # dayofyear + 1 for the second condition if we are looking
-            # at pre-rain days, otherwise, it should be post-rain days.
-            if (rain[dayofyear] == 0 and rain[dayofyear - 1] == 1):
-                tao = 0.60
 
-            # If airtemperature rise is less than 10 --> lower tao value
-            # unless by poles
-            if np.abs(lat_dd) < 60:
-                if deltaT[dayofyear] <= 10 and deltaT[dayofyear] != 0:
-                    tao = tao / (11 - deltaT[dayofyear])
 
 
             Pa = 101 * np.exp(-1 * alt / 8200)
