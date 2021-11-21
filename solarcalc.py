@@ -179,10 +179,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
     lat_rad = np.radians(lat_dd)
     lon_rad = np.radians(lon_dd)
 
-    datetime_ind = pd.date_range(
-        start=datetime.datetime(yearofcalc, 1, 1),
-        end=datetime.datetime(yearofcalc, 12, 31))
-    for dayofyear in datetime_ind.dayofyear:
+    for i, dayofyear in enumerate(climate_data.index.dayofyear):
         # Step 1. Calculate corrections to solar noon value
         # (See Campbell and Norman (1998))
 
