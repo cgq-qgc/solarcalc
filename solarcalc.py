@@ -115,14 +115,15 @@ def Zenith(lat_rad: float, solar_dec: float, time: float,
 
     Returns
     -------
-    float
-        Zenith angle approximation at time te.
+    zenith_angle : float
+        Zenith angle approximation in radians.
     """
-    temp = (
+    hour_angle = 15 * (solar_noon - time)
+    zenith_angle = np.arccos(
         np.sin(lat_rad) * np.sin(solar_dec) +
         np.cos(lat_rad) * np.cos(solar_dec) *
-        np.cos(15 * (time - solar_noon) * np.pi / 180))
-    return np.arccos(temp)
+        np.cos(hour_angle * np.pi / 180))
+    return zenith_angle
 
 
 def calc_halfdaylength(solar_dec: float, lat_rad: float) -> float:
