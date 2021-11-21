@@ -148,21 +148,6 @@ def calc_halfdaylength(solar_dec: float, lat_rad: float) -> float:
     return temp3
 
 
-def stefan_boltzman(airtemp: float):
-    """
-    Return black body radiation in Watts/m2  emitted from body.
-
-    Parameters
-    ----------
-    airtemp : float
-        airtemp or temperature of body.
-
-    Returns
-    -------
-    float
-        Emitted radiation (W/m2).
-    """
-    return 5.67E-08 * np.power(airtemp + 273.16, 4)
 
 
 def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
