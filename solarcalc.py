@@ -153,10 +153,8 @@ def calc_halfdaylength(solar_dec: float, lat_rad: float) -> float:
     return temp3
 
 
-
-
-def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
-                   rain, deltaT):
+def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
+                   climate_data: pd.DataFrame):
     """
     Predicts net radiation from only average temperature extremes
     and daily precipitation records.
@@ -170,6 +168,7 @@ def calc_solar_rad(yearofcalc: int, lon_dd: float, lat_dd: float, alt: float,
     lat_dd : float
         Site latitude in degree decimal.
     alt : float
+        Altitude of the site in m.
 
     Returns
     -------
