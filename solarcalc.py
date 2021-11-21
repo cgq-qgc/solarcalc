@@ -244,7 +244,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         time = np.arange(24)
 
         # Calculate the Zenith Angle.
-        zangle = Zenith(lat_rad, solarD, time, solarnoon)
+        zenith_angle = calc_zenith_angle(lat_rad, solarD, time, solarnoon)
 
         # Estimation of diffuse radiation
 
@@ -255,18 +255,18 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         # Sd is in Watts m^-2
 
         Pa = 101 * np.exp(-1 * alt / 8200)
-        m = Pa / 101.3 / np.cos(zangle)
+        m = Pa / 101.3 / np.cos(zenith_angle)
         Spo = 1360  # Solar constant in W/m2
 
         Sp = Spo * np.power(tao, m)
         Sp[(time < sunrise) | (time > sunset)] = 0
 
         # Beam irradiance on a horizontal surface.
-        Sb = Sp * np.cos(zangle)
+        Sb = Sp * np.cos(zenith_angle)
 
         # Diffuse sky irradiance on horizontal plane (Sd)
         # Formula given in Campbell and Norman (1998)
-        Sd = 0.3 * (1 - np.power(tao, m)) * np.cos(zangle) * Spo
+        Sd = 0.3 * (1 - np.power(tao, m)) * np.cos(zenith_angle) * Spo
         Sd[(time < sunrise) | (time > sunset)] = 0
 
         # The global solar radiation on a horizontal surface is the sum of the
