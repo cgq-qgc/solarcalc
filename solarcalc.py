@@ -298,4 +298,23 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
 
 if __name__ == '__main__':
-    pass
+    datafile = "D:/Projets/solarcalc/solarcalc_climatedata_2020.csv"
+    climate_data = pd.read_csv(
+        datafile, names=['dayofyear', 'tamin', 'tamax', 'ptot'])
+    climate_data.index = pd.date_range(
+        start=datetime.datetime(2020, 1, 1),
+        end=datetime.datetime(2020, 12, 31))
+
+    solar_rad, tao, deltat_array = calc_solar_rad(
+        lon_dd=-76.4687209,
+        lat_dd=56.5213541,
+        alt=100,
+        climate_data=climate_data)
+
+    df = pd.DataFrame([])
+    df['solar_rad'] = solar_rad
+    df['tao'] = tao
+    df['deltat_array'] = deltat_array
+    
+    df.to_csv('solarrad.csv')
+    
