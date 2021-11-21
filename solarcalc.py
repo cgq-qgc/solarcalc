@@ -23,11 +23,22 @@ import datetime
 import numpy as np
 import pandas as pd
 
+# To avoid "RuntimeWarning: overflow encountered in power" warnings when
+# calculating tao**m, which become very large just outside of the
+# sunrise and sunset times. This is not relevant here since Sd values
+# before sunrise and after sunset are forced to 0 anyway.
+np.seterr(over='ignore')
+
 
 def getET(dayofyear: int) -> float:
     """
     Calculate the Equation of Time correction (typically a 15-20 minutes
     correction depending on calendar day).
+
+    Source
+    ------
+    Equation 11.4 in Campbell, G.S. and J.M. Norman (1998). An Introduction to
+    Environmental Biophysics.
 
     Parameters
     ----------
@@ -197,39 +208,30 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
     lon_rad = np.radians(lon_dd)
 
     for i, dayofyear in enumerate(climate_data.index.dayofyear):
-        # Step 1. Calculate corrections to solar noon value
-        # (See Campbell and Norman (1998))
-
-        # Calculate LC correction to solar noon (hours) needs
-        # longitude correction for location of field site.
+        # Calculate LC correction to solar noon.
         LC = getLC(lon_rad)
 
-        # Gets correction for ET.
+        # Gets correction for Equation of Time.
         ET = getET(dayofyear)
 
         # Calculate solar noon value.
         solarnoon = 12 - LC - ET
 
-        # Step 2. Calculate Solar Declination angle
+        # Calculate the solar declination angle
         solarD = calc_solar_declination(dayofyear)
 
-        # Step 4. calcualte length of solar day (including twilight time)
-        # formula from Campbell and Norman, 1998 [Eq. 11.6] {1/2 daylight}
+        # Calculate the length of solar day (excluding twilight time).
         halfdaylength = calc_halfdaylength(solarD, lat_rad)
 
         sunrise = solarnoon - halfdaylength
         sunset = solarnoon + halfdaylength
 
-        # Approximatation of Sp.
-
-        # tao is atmospheric transmission :
-        # overcast = 0.4 --> from Liu and Jordan (1960)
-        # clear = 0.70 --> as given in Gates (1980)
-        tao = 0.70
+        # Estimate the atmospheric transmittance (tao).
+        tao = 0.70  # Clear sky value as  given in Gates (1980)
 
         # If it is raining then assume it is overcast (cloud cover).
         if rain[i] == 1:
-            tao = 0.40
+            tao = 0.40  # from Liu and Jordan (1960)
 
         # If it has been raining for two days then even
         # darker (denser cloud cover).
@@ -256,27 +258,24 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         # Calculate the Zenith Angle.
         zenith_angle = calc_zenith_angle(lat_rad, solarD, time, solarnoon)
 
-        # Estimation of diffuse radiation
+        # Calculate the atmospheric pressure at the observation site using
+        # Equation 3.7 in Campbell and Norman (1998).
+        Pa = 101 * np.exp(-1 * alt / 8200)  # TODO: correct 101 for 101.3.
 
-        # Liu, B.Y.H.; Jordan, R.C. The interrelationship and characteristic
-        # distribution of direct, diffuse and total solar radiation.
-        # Sol. Energy 1960, 4, 1–19.
-
-        # Sd is in Watts m^-2
-
-        Pa = 101 * np.exp(-1 * alt / 8200)
+        # Calculate the optical air mass number using Equation 11.12 in
+        # Campbell and Norman (1998).
         m = Pa / 101.3 / np.cos(zenith_angle)
+
         Spo = 1360  # Solar constant in W/m2
 
-        Sp = Spo * np.power(tao, m)
-        Sp[(time < sunrise) | (time > sunset)] = 0
+        # Calculate the hourly beam irradiance on a horizontal surface (Sb)
+        # using Equations 11.8 and 11.11 in Campbell and Norman (1998).
+        Sb = Spo * np.power(tao, m) * np.cos(zenith_angle)
+        Sb[(time < sunrise) | (time > sunset)] = 0
 
-        # Beam irradiance on a horizontal surface.
-        Sb = Sp * np.cos(zenith_angle)
-
-        # Diffuse sky irradiance on horizontal plane (Sd)
-        # Formula given in Campbell and Norman (1998)
-        Sd = 0.3 * (1 - np.power(tao, m)) * np.cos(zenith_angle) * Spo
+        # Calculate the diffuse sky irradiance on horizontal plane (Sd)
+        # using Equation 11.13 in Campbell and Norman (1998).
+        Sd = 0.3 * (1 - np.power(tao, m)) * Spo * np.cos(zenith_angle)
         Sd[(time < sunrise) | (time > sunset)] = 0
 
         # The global solar radiation on a horizontal surface is the sum of the
@@ -291,8 +290,9 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
         daily_solar_rad.extend(np.round(St, 2))
         tao_array.extend(np.ones(24) * tao)
+        deltat_array.extend(np.ones(24) * deltaT[i])
 
-    return daily_solar_rad, tao_array
+    return daily_solar_rad, tao_array, deltat_array
 
 
 if __name__ == '__main__':
