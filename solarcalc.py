@@ -18,6 +18,13 @@
 # Accessed 2021-11-19.
 # -----------------------------------------------------------------------------
 
+"""
+Global Solar Radiation Estimator
+
+Predicts hourly global solar radiation on a horizontal surface from only
+average temperature extremes and total precipitation records.
+"""
+
 from __future__ import annotations
 import datetime
 import numpy as np
