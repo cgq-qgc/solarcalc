@@ -205,7 +205,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
     # Convert rain[day of year] = 1 if rain and rain = 0 if no rain.
     rain = (climate_data['ptot'] > 1).values.astype(int)
     deltaT = (climate_data['tamax'].astype(int) -
-              climate_data['tamin'].astype(int)).values
+              climate_data['tamin'].astype(int)).abs().values
 
     daily_solar_rad = []
     tao_array = []
