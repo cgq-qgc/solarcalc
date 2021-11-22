@@ -188,8 +188,6 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
     Parameters
     ----------
-    dayofyears : TYPE
-        DESCRIPTION.
     lon_dd : float
         Site longitude in degree decimal.
     lat_dd : float
