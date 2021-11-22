@@ -312,6 +312,20 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
 
 if __name__ == '__main__':
+    # To fully compare with SolarCalc.jar, we need to calculate 2019 and 2020
+    # separately.
+    datafile = "D:/Projets/solarcalc/solarcalc_climatedata_2019.csv"
+    climate_data = pd.read_csv(
+        datafile, names=['dayofyear', 'tamin', 'tamax', 'ptot'])
+    climate_data.index = pd.date_range(
+        start=datetime.datetime(2019, 1, 1),
+        end=datetime.datetime(2019, 12, 31))
+    solarcalc = calc_solar_rad(
+        lon_dd=-76.4687209,
+        lat_dd=56.5213541,
+        alt=100,
+        climate_data=climate_data)
+
     datafile = "D:/Projets/solarcalc/solarcalc_climatedata_2020.csv"
     climate_data = pd.read_csv(
         datafile, names=['dayofyear', 'tamin', 'tamax', 'ptot'])
@@ -319,12 +333,11 @@ if __name__ == '__main__':
         start=datetime.datetime(2020, 1, 1),
         end=datetime.datetime(2020, 12, 31))
 
-    solarcalc = calc_solar_rad(
+    solarcalc = solarcalc.append(calc_solar_rad(
         lon_dd=-76.4687209,
         lat_dd=56.5213541,
         alt=100,
-        climate_data=climate_data)
+        climate_data=climate_data))
 
     print(solarcalc)
-
-    solarcalc.to_csv('solarrad.csv')
+    solarcalc.to_csv('output_2019-2020_solarcalc.py.csv')
