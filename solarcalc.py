@@ -243,16 +243,12 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
         # If it has been raining for two days then even
         # darker (denser cloud cover).
-        if rain[i] == 1 and rain[i - 1] == 1:
-            # Note that we cannot asses this condition for the first day
-            # of the climate serie.
+        if i > 0 and rain[i] == 1 and rain[i - 1] == 1:
             tau = 0.30
 
         # Assign pre-rain days to 80% of tau value ?
 
-        if rain[i] == 0 and rain[i - 1] == 1:
-            # Note that we cannot assess this condition for the last day of
-            # the climate data series.
+        if i > 0 and rain[i] == 0 and rain[i - 1] == 1:
             tau = 0.60
 
         # If airtemperature rise is less than 10 --> lower tau value
