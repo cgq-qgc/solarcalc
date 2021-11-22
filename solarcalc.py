@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 
 # To avoid "RuntimeWarning: overflow encountered in power" warnings when
-# calculating tao**m, which become very large just outside of the
+# calculating tau**m, which become very large just outside of the
 # sunrise and sunset times. This is not relevant here since Sd values
 # before sunrise and after sunset are forced to 0 anyway.
 np.seterr(over='ignore')
@@ -228,31 +228,32 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         sunrise = solarnoon - halfdaylength
         sunset = solarnoon + halfdaylength
 
-        # Estimate the atmospheric transmittance (tao).
-        tao = 0.70  # Clear sky value as  given in Gates (1980)
+        # Estimate the atmospheric transmittance (tau).
+        tau = 0.70  # Clear sky value as  given in Gates (1980)
 
         # If it is raining then assume it is overcast (cloud cover).
         if rain[i] == 1:
-            tao = 0.40  # from Liu and Jordan (1960)
+            tau = 0.40  # from Liu and Jordan (1960)
 
         # If it has been raining for two days then even
         # darker (denser cloud cover).
         if rain[i] == 1 and rain[i - 1] == 1:
             # Note that we cannot asses this condition for the first day
             # of the climate serie.
-            tao = 0.30
+            tau = 0.30
 
-        # Assign pre-rain days to 80% of tao value ?
+        # Assign pre-rain days to 80% of tau value ?
+
         if rain[i] == 0 and rain[i - 1] == 1:
             # Note that we cannot assess this condition for the last day of
             # the climate data series.
-            tao = 0.60
+            tau = 0.60
 
-        # If airtemperature rise is less than 10 --> lower tao value
+        # If airtemperature rise is less than 10 --> lower tau value
         # unless by poles
         if np.abs(lat_dd) < 60:
             if deltaT[i] <= 10 and deltaT[i] != 0:
-                tao = tao / (11 - deltaT[i])
+                tau = tau / (11 - deltaT[i])
 
         # Estimating direct and diffuse short wave radiation for each hour.
         time = np.arange(24)
@@ -272,12 +273,12 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
         # Calculate the hourly beam irradiance on a horizontal surface (Sb)
         # using Equations 11.8 and 11.11 in Campbell and Norman (1998).
-        Sb = Spo * np.power(tao, m) * np.cos(zenith_angle)
+        Sb = Spo * np.power(tau, m) * np.cos(zenith_angle)
         Sb[(time < sunrise) | (time > sunset)] = 0
 
         # Calculate the diffuse sky irradiance on horizontal plane (Sd)
         # using Equation 11.13 in Campbell and Norman (1998).
-        Sd = 0.3 * (1 - np.power(tao, m)) * Spo * np.cos(zenith_angle)
+        Sd = 0.3 * (1 - np.power(tau, m)) * Spo * np.cos(zenith_angle)
         Sd[(time < sunrise) | (time > sunset)] = 0
 
         # The global solar radiation on a horizontal surface is the sum of the
@@ -291,7 +292,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         St[pd.isnull(St)] = 0
 
         daily_solar_rad.extend(np.round(St, 2))
-        tao_array.extend(np.ones(24) * tao)
+        tao_array.extend(np.ones(24) * tau)
         deltat_array.extend(np.ones(24) * deltaT[i])
 
     return daily_solar_rad, tao_array, deltat_array
