@@ -5,7 +5,7 @@
 #
 # This code is licensed under the terms of the MIT License as published
 # by the Open Source Initiative. For more details, see the MIT license at
-# https://opensource.org/licenses/MIT.
+# https://opensource.org/licenses/MIT/.
 # -----------------------------------------------------------------------------
 
 """Installation script """
