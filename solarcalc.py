@@ -175,10 +175,9 @@ def calc_halfdaylength(solar_dec: float, lat_rad: float,
 
 
 def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
-                   climate_data: pd.DataFrame):
+                   climate_data: pd.DataFrame) -> pd.DataFrame:
     """
-    Predicts net radiation from only average temperature extremes
-    and daily precipitation records.
+    Predict hourly global solar radiation on a horizontal surface.
 
     Parameters
     ----------
@@ -295,7 +294,18 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         tao_array.extend(np.ones(24) * tau)
         deltat_array.extend(np.ones(24) * deltaT[i])
 
-    return daily_solar_rad, tao_array, deltat_array
+    # Prepare the results output.
+    solarcalc = pd.DataFrame(
+        [],
+        index=pd.date_range(
+            start=climate_data.index[0],
+            end=climate_data.index[-1] + pd.Timedelta('23H'),
+            freq='H'))
+    solarcalc['solar_rad'] = daily_solar_rad
+    solarcalc['deltat_degC'] = deltat_array
+    solarcalc['tau'] = tao_array
+
+    return solarcalc
 
 
 if __name__ == '__main__':
@@ -306,16 +316,12 @@ if __name__ == '__main__':
         start=datetime.datetime(2020, 1, 1),
         end=datetime.datetime(2020, 12, 31))
 
-    solar_rad, tao, deltat_array = calc_solar_rad(
+    solarcalc = calc_solar_rad(
         lon_dd=-76.4687209,
         lat_dd=56.5213541,
         alt=100,
         climate_data=climate_data)
 
-    df = pd.DataFrame([])
-    df['solar_rad'] = solar_rad
-    df['tao'] = tao
-    df['deltat_array'] = deltat_array
-    
-    df.to_csv('solarrad.csv')
-    
+    print(solarcalc)
+
+    solarcalc.to_csv('solarrad.csv')
