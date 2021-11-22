@@ -34,7 +34,7 @@ LONG_DESCRIPTION = (
     "improvements and fixed some issues with the original code and method."
     )
 
-INSTALL_REQUIRES = ['numpy, pandas']
+INSTALL_REQUIRES = ['numpy', 'pandas']
 
 setup(name='solarcalc',
       version=__version__,
