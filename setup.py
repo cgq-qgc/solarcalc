@@ -10,7 +10,6 @@
 
 """Installation script """
 
-import setuptools
 from setuptools import setup
 from solarcalc import __version__, __project_url__
 
@@ -45,11 +44,9 @@ setup(name='solarcalc',
       author='Jean-Sébastien Gosselin',
       author_email='jean-sebastien.gosselin@outlook.ca',
       url=__project_url__,
-      ext_modules=[],
-      packages=setuptools.find_packages(),
-      package_data={},
-      include_package_data=True,
+      py_modules=['solarcalc'],
       install_requires=INSTALL_REQUIRES,
+      data_files=[('', ['demo_climatedata.csv'])],
       classifiers=["Programming Language :: Python :: 3",
                    "License :: OSI Approved :: MIT License",
                    "Operating System :: OS Independent",
