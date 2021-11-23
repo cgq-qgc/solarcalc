@@ -216,8 +216,8 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         A pandas dataframe containing the consecutive (no missing value) daily
         meterological data that are required for the calculatations in the
         following columns :
-            * tamax_degC: daily maximum temperature in Celcius.
-            * tamin_degC: daily minimum temperature in Celcius.
+            * tamax_degC : daily maximum temperature in Celcius.
+            * tamin_degC : daily minimum temperature in Celcius.
             * ptot_mm : daily total precipitations in mm.
         The index of the dataframe must contain the date for each daily
         reading in a pandas DatetimeIndex.
@@ -226,9 +226,9 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
     -------
     A pandas dataframe that contain the hourly values estimated by the model
     in the following columns:
-        * solar_rad_W/m2: hourly global solar radiation on a horizontal
+        * solar_rad_W/m2 : hourly global solar radiation on a horizontal
           surface in W/m2.
-        * deltat_degC: daily temperature total variation.
+        * deltat_degC : daily temperature total variation.
         * tau : atmospheric transmittance.
     The index of the dataframe contains the date and time for each hourly
     reading in a pandas DatetimeIndex.
