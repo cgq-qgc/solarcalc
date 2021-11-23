@@ -26,6 +26,7 @@ daily average temperature extremes and total precipitation records.
 """
 
 from __future__ import annotations
+import os.path as osp
 import numpy as np
 import pandas as pd
 
@@ -37,6 +38,21 @@ __project_url__ = "https://github.com/cgq-qgc/solarcalc"
 # sunrise and sunset times. This is not relevant here since Sd values
 # before sunrise and after sunset are forced to 0 anyway.
 np.seterr(over='ignore')
+
+
+def load_demo_climatedata() -> pd.DataFrame:
+    """
+    Return a pandas dataframe containing climate data to run
+    a demo of solarcalc.
+    """
+    return pd.read_csv(
+        osp.join(osp.dirname(__file__), 'demo_climatedata.csv'),
+        parse_dates=['datetime'],
+        index_col='datetime',
+        dtype={'tamin_degC': 'float',
+               'tamax_degC': 'float',
+               'ptot_mm': 'float'}
+        )
 
 
 def getET(dayofyear: int) -> float:
