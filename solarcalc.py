@@ -212,16 +212,31 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         Site latitude in degree decimal.
     alt : float
         Altitude of the site in m.
+    climate_data : pd.DataFrame
+        A pandas dataframe containing the consecutive (no missing value) daily
+        meterological data that are required for the calculatations in the
+        following columns :
+            * tamax_degC: daily maximum temperature in Celcius.
+            * tamin_degC: daily minimum temperature in Celcius.
+            * ptot_mm : daily total precipitations in mm.
+        The index of the dataframe must contain the date for each daily
+        reading in a pandas DatetimeIndex.
 
     Returns
     -------
-    None.
-
+    A pandas dataframe that contain the hourly values estimated by the model
+    in the following columns:
+        * solar_rad_W/m2: hourly global solar radiation on a horizontal
+          surface in W/m2.
+        * deltat_degC: daily temperature total variation.
+        * tau : atmospheric transmittance.
+    The index of the dataframe contains the date and time for each hourly
+    reading in a pandas DatetimeIndex.
     """
     # Convert rain[day of year] = 1 if rain and rain = 0 if no rain.
-    rain = (climate_data['ptot'] > 1).values.astype(int)
-    deltaT = (climate_data['tamax'].astype(int) -
-              climate_data['tamin'].astype(int)).abs().values
+    rain = (climate_data['ptot_mm'] > 1).values.astype(int)
+    deltaT = (climate_data['tamax_degC'].astype(int) -
+              climate_data['tamin_degC'].astype(int)).abs().values
 
     daily_solar_rad = []
     tao_array = []
@@ -320,7 +335,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
             start=climate_data.index[0],
             end=climate_data.index[-1] + pd.Timedelta('23H'),
             freq='H'))
-    solarcalc['solar_rad'] = daily_solar_rad
+    solarcalc['solar_rad_W/m2'] = daily_solar_rad
     solarcalc['deltat_degC'] = deltat_array
     solarcalc['tau'] = tao_array
 
@@ -328,34 +343,10 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
 
 if __name__ == '__main__':
-    import datetime
-
-    # To fully compare with SolarCalc.jar, we need to calculate 2019 and 2020
-    # separately.
-    datafile = "D:/Projets/solarcalc/solarcalc_climatedata_2019.csv"
-    climate_data = pd.read_csv(
-        datafile, names=['dayofyear', 'tamin', 'tamax', 'ptot'])
-    climate_data.index = pd.date_range(
-        start=datetime.datetime(2019, 1, 1),
-        end=datetime.datetime(2019, 12, 31))
+    climate_data = load_demo_climatedata()
     solarcalc = calc_solar_rad(
         lon_dd=-76.4687209,
         lat_dd=56.5213541,
         alt=100,
         climate_data=climate_data)
-
-    datafile = "D:/Projets/solarcalc/solarcalc_climatedata_2020.csv"
-    climate_data = pd.read_csv(
-        datafile, names=['dayofyear', 'tamin', 'tamax', 'ptot'])
-    climate_data.index = pd.date_range(
-        start=datetime.datetime(2020, 1, 1),
-        end=datetime.datetime(2020, 12, 31))
-
-    solarcalc = solarcalc.append(calc_solar_rad(
-        lon_dd=-76.4687209,
-        lat_dd=56.5213541,
-        alt=100,
-        climate_data=climate_data))
-
-    print(solarcalc)
-    solarcalc.to_csv('output_2019-2020_solarcalc.py.csv')
+    solarcalc.to_csv('output_solarcalc_demo.csv')
