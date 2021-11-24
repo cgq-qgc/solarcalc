@@ -296,7 +296,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
         # Calculate the atmospheric pressure at the observation site using
         # Equation 3.7 in Campbell and Norman (1998).
-        Pa = 101 * np.exp(-1 * alt / 8200)  # TODO: correct 101 for 101.3.
+        Pa = 101.3 * np.exp(-1 * alt / 8200)
 
         # Calculate the optical air mass number using Equation 11.12 in
         # Campbell and Norman (1998).
