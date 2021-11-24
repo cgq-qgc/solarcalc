@@ -6,7 +6,7 @@ variables:
   CODECOV_TOKEN: "63553798-c180-4250-adb0-5ce29069164b"
 
 pool:
-  vmImage: 'vs2017-win2016'
+  vmImage: 'windows-2019'
 
 strategy:
   matrix:
