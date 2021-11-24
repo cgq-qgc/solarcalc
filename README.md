@@ -1,5 +1,6 @@
 # SolarCalc
 [![license](https://img.shields.io/pypi/l/appconfigs.svg)](./LICENSE)
+[![pypi version](https://img.shields.io/pypi/v/solarcalc.svg)](https://pypi.org/project/solarcalc/)
 
 The SolarcCalc module is used to predict hourly global solar
 radiation on a horizontal surface from daily average temperature
