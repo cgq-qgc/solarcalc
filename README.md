@@ -15,3 +15,48 @@ available free of charge at [https://data.nal.usda.gov/dataset/solarcalc-10](htt
 <br><br>
 Subsequent versions of the SolarcCalc module implemented performance
 improvements and fixed some issues with the original code and method.
+
+
+## Installation
+
+`SolarCalc` can be installed with `pip` by running:
+
+```commandlines
+pip install solarcalc
+```
+
+## Requirements
+
+- [numpy](https://github.com/numpy/numpy) :  The fundamental package for scientific computing with Python.
+- [pandas](https://github.com/pandas-dev/pandas) : Flexible and powerful data analysis / manipulation library for Python.
+
+## Example
+
+```
+>>> from solarcalc import load_demo_climatedata, calc_solar_rad
+
+>>> climate_data = load_demo_climatedata()
+>>> solarcalc = calc_solar_rad(
+>>>     lon_dd=-76.4687209,
+>>>     lat_dd=56.5213541,
+>>>     alt=100,
+>>>     climate_data=climate_data)
+>>> solarcalc.to_csv('output_solarcalc_demo.csv')
+>>> print(solarcalc)
+
+                     solar_rad_W/m2  deltat_degC       tau
+1980-01-01 00:00:00             0.0          8.0  0.233333
+1980-01-01 01:00:00             0.0          8.0  0.233333
+1980-01-01 02:00:00             0.0          8.0  0.233333
+1980-01-01 03:00:00             0.0          8.0  0.233333
+1980-01-01 04:00:00             0.0          8.0  0.233333
+                            ...          ...       ...
+2020-12-31 19:00:00             0.0          5.0  0.116667
+2020-12-31 20:00:00             0.0          5.0  0.116667
+2020-12-31 21:00:00             0.0          5.0  0.116667
+2020-12-31 22:00:00             0.0          5.0  0.116667
+2020-12-31 23:00:00             0.0          5.0  0.116667
+
+[359424 rows x 3 columns]
+
+```
