@@ -86,24 +86,28 @@ def getET(dayofyear: int) -> float:
         ) / 3600
 
 
-def getLC(long2: float):
+def calc_long_corr(lon_dd: float) -> float:
     """
-    Calculate the longitudal correction.
+    Calculate the longitudinal correction.
 
     Parameters
     ----------
-    long2 : float
-        longitude of fieldsite in radians. Negative value if West of meridian
-        and positive value if East of meridian.
+    lon_dd : float
+        Longitude of fieldsite in decimal degrees. Negative value if West
+        of meridian and positive value if East of meridian.
 
     Returns
     -------
-    TYPE
-        DESCRIPTION.
+    float
+        Longitudinal correction in hours.
     """
-    # We assume longitude is in decimal format.
-    # Translates to 4 minutes for each degree
-    return long2 / 360 * 24
+    # Calculate the local standard time meridian.
+    lstm = lon_dd - lon_dd % (np.sign(lon_dd) * 15)
+
+    # Calculate the longitudinal correction in hours.
+    long_corr = (lon_dd - lstm) * (24 / 360)
+
+    return long_corr
 
 
 def calc_solar_declination(dayofyear: int) -> float:
@@ -248,7 +252,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
 
     for i, dayofyear in enumerate(climate_data.index.dayofyear):
         # Calculate LC correction to solar noon.
-        LC = getLC(lon_rad)
+        LC = calc_long_corr(lon_dd)
 
         # Gets correction for Equation of Time.
         ET = getET(dayofyear)
