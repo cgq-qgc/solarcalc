@@ -8,15 +8,20 @@
 """
 File for running tests programmatically.
 """
-
+import os
 import pytest
 
 
 def main():
     """Run pytest tests."""
-    errno = pytest.main(['-x', 'solarcalc', '-v', '-rw', '--durations=10',
-                         '--cov=gwire', '-o', 'junit_family=xunit2',
-                         '--no-coverage-upload'])
+    if os.environ.get('AZURE', None):
+        errno = pytest.main(['-x', '.', '-v', '-rw', '--durations=10',
+                             '--cov=solarcalc', '-o', 'junit_family=xunit2',
+                             '--no-coverage-upload'])
+    else:
+        errno = pytest.main(['-x', '.', '-v', '-rw', '--durations=10',
+                             '--cov=solarcalc', '-o', 'junit_family=xunit2'])
+
     if errno != 0:
         raise SystemExit(errno)
 
