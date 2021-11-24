@@ -49,3 +49,29 @@ def test_calc_eqn_of_time(datetimes):
     err = np.abs(results - expected_results)
     assert np.all(err < 0.3)
 
+
+def test_calc_solar_noon(datetimes):
+    """
+    Test that solar noon is calculated as expected.
+    """
+    lon_dd = -74.351267
+    LC = calc_long_corr(lon_dd)
+    ET = calc_eqn_of_time(datetimes.dayofyear.values)
+    solarnoon = 12 - LC - ET
+
+    # https://gml.noaa.gov/grad/solcalc/
+    # Values corrected for daylight saving time change.
+    expected_results = np.array([
+        12 + 0/60 + 50/3600 + 1,
+        13 + 1/60 + 38/3600,
+        12 + 58/60 + 55/3600,
+        13 + 1/60 + 7/3600,
+        11 + 44/60 + 55/3600 + 1
+        ])
+
+    err = np.abs(solarnoon - expected_results)
+    assert np.all(err < 0.0035)
+
+
+if __name__ == "__main__":
+    pytest.main(['-x', osp.basename(__file__), '-vv', '-rw', '-s'])
