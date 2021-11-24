@@ -1,0 +1,46 @@
+trigger:
+- master
+
+variables:
+  AZURE: True
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+strategy:
+  matrix:
+    Python38:
+      python.version: '3.8'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
+
+- script: |
+    python -m pip install --upgrade pip
+    python -m pip install wheel
+    pip install -r requirements.txt
+    pip install -r requirements-dev.txt
+    pip install pytest-azurepipelines
+  displayName: 'Install dependencies'
+
+- script: |
+    python runtests.py
+  displayName: 'Run tests'
+  continueOnError: false
+
+- script: |
+    codecov
+  displayName: 'Run codecov'
+
+- script: |
+    pip install wheel
+    python setup.py sdist bdist_wheel
+  displayName: 'Build dist'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.SourcesDirectory)/dist'
+  displayName: 'Publish dist'
