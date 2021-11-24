@@ -251,7 +251,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
     lon_rad = np.radians(lon_dd)
 
     for i, dayofyear in enumerate(climate_data.index.dayofyear):
-        # Calculate LC correction to solar noon.
+        # Calculate the longitudinal correction to solar noon.
         LC = calc_long_corr(lon_dd)
 
         # Gets correction for Equation of Time.
