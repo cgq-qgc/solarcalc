@@ -2,6 +2,7 @@
 [![license](https://img.shields.io/pypi/l/appconfigs.svg)](./LICENSE)
 [![pypi version](https://img.shields.io/pypi/v/solarcalc.svg)](https://pypi.org/project/solarcalc/)
 [![Build Status](https://dev.azure.com/jean-sebastiengosselin/solarcalc/_apis/build/status/cgq-qgc.solarcalc?branchName=main)](https://dev.azure.com/jean-sebastiengosselin/solarcalc/_build/latest?definitionId=5&branchName=main)
+[![codecov](https://codecov.io/gh/cgq-qgc/solarcalc/branch/main/graph/badge.svg?token=phjHo2WhLX)](https://codecov.io/gh/cgq-qgc/solarcalc)
 
 The SolarcCalc module is used to predict hourly global solar
 radiation on a horizontal surface from daily average temperature
