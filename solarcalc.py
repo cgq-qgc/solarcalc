@@ -341,6 +341,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
             start=climate_data.index[0],
             end=climate_data.index[-1] + pd.Timedelta('23H'),
             freq='H'))
+    solarcalc.index.name = 'datetime'
     solarcalc['solar_rad_W/m2'] = daily_solar_rad
     solarcalc['deltat_degC'] = deltat_array
     solarcalc['tau'] = tao_array
