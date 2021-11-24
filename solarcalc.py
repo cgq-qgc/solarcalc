@@ -285,8 +285,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
             tau = 0.30
 
         # Assign pre-rain days to 80% of tau value ?
-
-        if i > 0 and rain[i] == 0 and rain[i - 1] == 1:
+        if i < (len(climate_data) - 1) and rain[i] == 0 and rain[i + 1] == 1:
             tau = 0.60
 
         # If airtemperature rise is less than 10 --> lower tau value
