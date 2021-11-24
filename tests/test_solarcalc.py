@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
-# Copyright © Jean-Sébastien Gosselin
+# Copyright © INRS
 # Licensed under the terms of the MIT License
-# (https://github.com/jnsebgosselin/appconfigs)
+# https://github.com/cgq-qgc/solarcalc
 # -----------------------------------------------------------------------------
 
 # ---- Standard imports
