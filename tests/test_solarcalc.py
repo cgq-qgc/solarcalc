@@ -15,7 +15,8 @@ import pandas as pd
 import numpy as np
 
 # ---- Local imports
-from solarcalc import calc_long_corr, calc_eqn_of_time
+from solarcalc import (calc_long_corr, calc_eqn_of_time, calc_solar_rad,
+                       load_demo_climatedata)
 
 
 @pytest.fixture
@@ -70,6 +71,32 @@ def test_calc_solar_noon(datetimes):
 
     err = np.abs(solarnoon - expected_results)
     assert np.all(err < 0.0035)
+
+
+def test_solar_calc():
+    """
+    Test that global solar radiation is calculated as expected.
+    """
+    expected_results = pd.read_csv(
+        osp.join(osp.dirname(__file__), 'output_solarcalc_demo.csv'),
+        header=0,
+        parse_dates=['datetime'],
+        index_col='datetime',
+        dtype={'solar_rad_W/m2': 'float',
+               'solar_rad_W/m2': 'float',
+               'tau': 'float'}
+        ).round(8)
+
+    climate_data = load_demo_climatedata()
+    solar_rad = calc_solar_rad(
+        lon_dd=-76.4687209,
+        lat_dd=56.5213541,
+        alt=100,
+        climate_data=climate_data
+        ).round(8)
+
+    assert (expected_results.index == solar_rad.index).all()
+    assert expected_results.values.tolist() == solar_rad.values.tolist()
 
 
 if __name__ == "__main__":
