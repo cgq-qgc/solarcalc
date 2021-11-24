@@ -41,7 +41,6 @@ pip install solarcalc
 >>>     lat_dd=56.5213541,
 >>>     alt=100,
 >>>     climate_data=climate_data)
->>> solarcalc.to_csv('output_solarcalc_demo.csv')
 >>> print(solarcalc)
 
                      solar_rad_W/m2  deltat_degC       tau
