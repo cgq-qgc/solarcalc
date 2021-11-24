@@ -55,7 +55,7 @@ def load_demo_climatedata() -> pd.DataFrame:
         )
 
 
-def getET(dayofyear: int) -> float:
+def calc_eqn_of_time(dayofyear: int) -> float:
     """
     Calculate the Equation of Time correction (typically a 15-20 minutes
     correction depending on calendar day).
@@ -76,13 +76,16 @@ def getET(dayofyear: int) -> float:
         Calculated Equation of Time value in hours.
 
     """
-    ETcalc = (279.575 + 0.9856 * dayofyear) * np.pi / 180
+    f = (279.575 + 0.98565 * dayofyear) * np.pi / 180
 
     return (
-        -104.7 * np.sin(ETcalc) + 596.2 * np.sin(ETcalc * 2) +
-        4.3 * np.sin(3 * ETcalc) + -12.7 * np.sin(4 * ETcalc) +
-        -429.3 * np.cos(ETcalc) + -2.0 * np.cos(2 * ETcalc) +
-        19.3 * np.cos(3 * ETcalc)
+        -104.7 * np.sin(f) +
+        596.2 * np.sin(2 * f) +
+        4.3 * np.sin(3 * f) +
+        -12.7 * np.sin(4 * f) +
+        -429.3 * np.cos(f) +
+        -2.0 * np.cos(2 * f) +
+        19.3 * np.cos(3 * f)
         ) / 3600
 
 
@@ -255,7 +258,7 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
         LC = calc_long_corr(lon_dd)
 
         # Gets correction for Equation of Time.
-        ET = getET(dayofyear)
+        ET = calc_eqn_of_time(dayofyear)
 
         # Calculate solar noon value.
         solarnoon = 12 - LC - ET
