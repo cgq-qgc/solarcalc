@@ -6,7 +6,6 @@
 # -----------------------------------------------------------------------------
 
 # ---- Standard imports
-import os
 import os.path as osp
 from datetime import datetime
 
