@@ -357,3 +357,4 @@ if __name__ == '__main__':
         alt=100,
         climate_data=climate_data)
     solarcalc.to_csv('output_solarcalc_demo.csv')
+    print(solarcalc)
