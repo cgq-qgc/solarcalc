@@ -15,8 +15,7 @@ import pandas as pd
 import numpy as np
 
 # ---- Local imports
-from solarcalc import (calc_long_corr, calc_eqn_of_time, calc_solar_rad,
-                       load_demo_climatedata)
+from solarcalc import (calc_long_corr, calc_eqn_of_time, calc_solar_rad)
 
 
 @pytest.fixture
@@ -28,6 +27,32 @@ def datetimes():
         datetime(2000, 8, 18),
         datetime(2000, 11, 26)
         ])
+
+
+@pytest.fixture
+def climate_data():
+    dataf = pd.DataFrame(
+        data=[],
+        index=pd.to_datetime([
+            "1980-01-01", "1980-01-02", "1980-01-03", "1980-01-04",
+            "1980-01-05", "1980-01-06"
+            ])
+        )
+
+    # The first reading test the condition deltaT[i] <= 10
+    # The second reading test the condition deltaT[i] > 10
+    # The other readings test the condition deltaT[i] == 0
+    dataf['tamin_degC'] = [-20.8, -24.4, -28.7, -32.84, -33.4, -29.6]
+    dataf['tamax_degC'] = [-14.8, -14.0, -28.7, -32.84, -33.4, -29.6]
+
+    # The first reading test the overcast condition at the start of the series.
+    # The second reading test the clear sky condition.
+    # The third reading test the pre-rain condition.
+    # The fourth reading test the overcast condition.
+    # The fifth reading test the denser cloud cover condition.
+    # The sixth reading thes the clear sky condition at the end of the series.
+    dataf['ptot_mm'] = [1.54, 0.41, 0.00, 2.35, 1.92, 0.21]
+    return dataf
 
 
 # =============================================================================
@@ -73,30 +98,49 @@ def test_calc_solar_noon(datetimes):
     assert np.all(err < 0.0035)
 
 
-def test_solar_calc():
+def test_solar_calc(climate_data):
     """
     Test that global solar radiation is calculated as expected.
     """
-    expected_results = pd.read_csv(
-        osp.join(osp.dirname(__file__), 'output_solarcalc_demo.csv'),
-        header=0,
-        parse_dates=['datetime'],
-        index_col='datetime',
-        dtype={'solar_rad_W/m2': 'float',
-               'solar_rad_W/m2': 'float',
-               'tau': 'float'}
-        ).round(8)
-
-    climate_data = load_demo_climatedata()
+    # climate_data = load_demo_climatedata()
     solar_rad = calc_solar_rad(
         lon_dd=-76.4687209,
         lat_dd=56.5213541,
         alt=100,
         climate_data=climate_data
-        ).round(8)
+        )
 
-    assert (expected_results.index == solar_rad.index).all()
-    assert expected_results.values.tolist() == solar_rad.values.tolist()
+    assert np.all(
+        solar_rad['deltat_degC'].round(12).values ==
+        np.repeat([6, 10.4, 0, 0, 0, 0], 24)
+        )
+    assert np.all(
+        solar_rad['tau'].round(12).values ==
+        np.repeat([0.4 / (11 - 6), 0.7, 0.6, 0.4, 0.3, 0.7], 24)
+        )
+    expected_results = np.array([ 
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   6.98,  41.6 ,  64.28,  73.5 ,  68.62,  49.97,  18.82,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   7.19,  45.07,  81.08,  98.82,  89.54,  57.65,  19.67,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   7.44,  43.02,  71.64,  85.66,  78.56,  53.7 ,  20.5 ,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   7.75,  42.7 ,  66.27,  76.57,  71.6 ,  52.44,  21.4 ,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   8.11,  43.15,  66.4 ,  76.26,  71.69,  53.23,  22.35,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,
+        0.  ,   8.53,  47.46,  85.16, 104.19,  95.5 ,  63.03,  23.46,
+        0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ,   0.  ])
+    assert np.all(
+        expected_results ==
+        solar_rad['solar_rad_W/m2'].round(12).values
+        )
 
 
 if __name__ == "__main__":
