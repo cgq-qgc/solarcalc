@@ -39,11 +39,12 @@ def climate_data():
             ])
         )
 
-    # The first reading test the condition deltaT[i] <= 10
+    # The first reading test the condition deltaT[i] <= 10 and when
+    # tamax and tamin values are inverted.
     # The second reading test the condition deltaT[i] > 10
     # The other readings test the condition deltaT[i] == 0
-    dataf['tamin_degC'] = [-20.8, -24.4, -28.7, -32.84, -33.4, -29.6]
-    dataf['tamax_degC'] = [-14.8, -14.0, -28.7, -32.84, -33.4, -29.6]
+    dataf['tamin_degC'] = [-20.8, -14.0, -28.7, -32.84, -33.4, -29.6]
+    dataf['tamax_degC'] = [-14.8, -24.4, -28.7, -32.84, -33.4, -29.6]
 
     # The first reading test the overcast condition at the start of the series.
     # The second reading test the clear sky condition.
