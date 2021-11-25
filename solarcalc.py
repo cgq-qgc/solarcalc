@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
-# Copyright © INRS
+# Copyright © SolarCalc Project Contributors
 # https://github.com/cgq-qgc/solarcalc
 #
 # This code is licensed under the terms of the MIT License as published
