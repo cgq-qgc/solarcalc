@@ -30,7 +30,7 @@ import os.path as osp
 import numpy as np
 import pandas as pd
 
-__version__ = "1.0"
+__version__ = "1.1"
 __project_url__ = "https://github.com/cgq-qgc/solarcalc"
 
 # To avoid "RuntimeWarning: overflow encountered in power" warnings when
