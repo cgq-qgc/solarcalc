@@ -243,118 +243,118 @@ def calc_solar_rad(lon_dd: float, lat_dd: float, alt: float,
     # Convert rain[day of year] = 1 if rain and rain = 0 if no rain.
     rain = (climate_data['ptot_mm'] > 1).values.astype(int)
     deltaT = (climate_data['tamax_degC'] -
-              climate_data['tamin_degC']).abs().values
+              climate_data['tamin_degC']).abs().round(5).values
 
-    daily_solar_rad = []
-    tao_array = []
-    deltat_array = []
-
-    # Convert lat and long to radian numbers.
-    lat_rad = np.radians(lat_dd)
-    lon_rad = np.radians(lon_dd)
-
-    for i, dayofyear in enumerate(climate_data.index.dayofyear):
-        # Calculate the longitudinal correction to solar noon.
-        LC = calc_long_corr(lon_dd)
-
-        # Gets correction for Equation of Time.
-        ET = calc_eqn_of_time(dayofyear)
-
-        # Calculate solar noon value.
-        solarnoon = 12 - LC - ET
-
-        # Calculate the solar declination angle
-        solarD = calc_solar_declination(dayofyear)
-
-        # Calculate the length of solar day (excluding twilight time).
-        halfdaylength = calc_halfdaylength(solarD, lat_rad)
-
-        sunrise = solarnoon - halfdaylength
-        sunset = solarnoon + halfdaylength
-
-        # Estimate the atmospheric transmittance (tau).
-        tau = 0.70  # Clear sky value as  given in Gates (1980)
+    # Estimate the atmospheric transmittance (tau) based on the
+    # input climate data.
+    n = len(climate_data)
+    tau = np.zeros(n)
+    for i in range(n):
+        tau[i] = 0.70  # Clear sky value as  given in Gates (1980)
 
         # If it is raining then assume it is overcast (cloud cover).
         if rain[i] == 1:
-            tau = 0.40  # from Liu and Jordan (1960)
+            tau[i] = 0.40  # from Liu and Jordan (1960)
 
         # If it has been raining for two days then even
         # darker (denser cloud cover).
         if i > 0 and rain[i] == 1 and rain[i - 1] == 1:
-            tau = 0.30
+            tau[i] = 0.30
 
         # Assign pre-rain days to 80% of tau value ?
-        if i < (len(climate_data) - 1) and rain[i] == 0 and rain[i + 1] == 1:
-            tau = 0.60
+        if i < (n - 1) and rain[i] == 0 and rain[i + 1] == 1:
+            tau[i] = 0.60
 
         # If airtemperature rise is less than 10 --> lower tau value
         # unless by poles
         if np.abs(lat_dd) < 60:
             if deltaT[i] <= 10 and deltaT[i] != 0:
-                tau = tau / (11 - deltaT[i])
+                tau[i] = tau[i] / (11 - deltaT[i])
 
-        # Estimating direct and diffuse short wave radiation for each hour.
-        time = np.arange(24)
+    # Expand rain, deltaT and tau from daily to hourly time frame.
+    rain = np.repeat(rain, 24)
+    deltaT = np.repeat(deltaT, 24)
+    tau = np.repeat(tau, 24)
 
-        # Calculate the Zenith Angle.
-        zenith_angle = calc_zenith_angle(lat_rad, solarD, time, solarnoon)
-
-        # Calculate the atmospheric pressure at the observation site using
-        # Equation 3.7 in Campbell and Norman (1998).
-        Pa = 101.3 * np.exp(-1 * alt / 8200)
-
-        # Calculate the optical air mass number using Equation 11.12 in
-        # Campbell and Norman (1998).
-        m = Pa / 101.3 / np.cos(zenith_angle)
-
-        Spo = 1360  # Solar constant in W/m2
-
-        # Calculate the hourly beam irradiance on a horizontal surface (Sb)
-        # using Equations 11.8 and 11.11 in Campbell and Norman (1998).
-        Sb = Spo * np.power(tau, m) * np.cos(zenith_angle)
-        Sb[(time < sunrise) | (time > sunset)] = 0
-
-        # Calculate the diffuse sky irradiance on horizontal plane (Sd)
-        # using Equation 11.13 in Campbell and Norman (1998).
-        Sd = 0.3 * (1 - np.power(tau, m)) * Spo * np.cos(zenith_angle)
-        Sd[(time < sunrise) | (time > sunset)] = 0
-
-        # The global solar radiation on a horizontal surface is the sum of the
-        # horizontal direct beam (Sb) and diffuse radiation (Sd).
-        St = Sb + Sd
-
-        # Check for never daylight northern latitudes.
-        St[St < 0] = 0
-
-        # Fill NaN values with zeros.
-        St[pd.isnull(St)] = 0
-
-        daily_solar_rad.extend(np.round(St, 2))
-        tao_array.extend(np.ones(24) * tau)
-        deltat_array.extend(np.ones(24) * deltaT[i])
-
-    # Prepare the results output.
-    solarcalc = pd.DataFrame(
+    # Prepare the dataframe that will be used to store the results and that
+    # will be returned as the output of this function.
+    dataframe = pd.DataFrame(
         [],
         index=pd.date_range(
             start=climate_data.index[0],
             end=climate_data.index[-1] + pd.Timedelta('23H'),
             freq='H'))
-    solarcalc.index.name = 'datetime'
-    solarcalc['solar_rad_W/m2'] = daily_solar_rad
-    solarcalc['deltat_degC'] = deltat_array
-    solarcalc['tau'] = tao_array
+    dataframe.index.name = 'datetime'
 
-    return solarcalc
+    dayofyear = dataframe.index.dayofyear.values
+    time = dataframe.index.hour.values
+
+    # Calculate the longitudinal correction to solar noon.
+    LC = calc_long_corr(lon_dd)
+
+    # Calculate the correction for Equation of Time.
+    ET = calc_eqn_of_time(dayofyear)
+
+    # Calculate solar noon value.
+    solarnoon = 12 - LC - ET
+
+    # Calculate the solar declination angle
+    solarD = calc_solar_declination(dayofyear)
+
+    # Calculate the length of solar day (excluding twilight time).
+    halfdaylength = calc_halfdaylength(solarD, np.radians(lat_dd))
+
+    # Calculate the sunrise and sunset time.
+    sunrise = solarnoon - halfdaylength
+    sunset = solarnoon + halfdaylength
+
+    # Calculate the Zenith Angle.
+    zenith_angle = calc_zenith_angle(
+        np.radians(lat_dd), solarD, time, solarnoon)
+
+    # Calculate the atmospheric pressure at the observation site using
+    # Equation 3.7 in Campbell and Norman (1998).
+    Pa = 101.3 * np.exp(-1 * alt / 8200)
+
+    # Calculate the optical air mass number using Equation 11.12 in
+    # Campbell and Norman (1998).
+    m = Pa / 101.3 / np.cos(zenith_angle)
+
+    Spo = 1360  # Solar constant in W/m2
+
+    # Calculate the hourly beam irradiance on a horizontal surface (Sb)
+    # using Equations 11.8 and 11.11 in Campbell and Norman (1998).
+    Sb = Spo * np.power(tau, m) * np.cos(zenith_angle)
+    Sb[(time < sunrise) | (time > sunset)] = 0
+
+    # Calculate the diffuse sky irradiance on horizontal plane (Sd)
+    # using Equation 11.13 in Campbell and Norman (1998).
+    Sd = 0.3 * (1 - np.power(tau, m)) * Spo * np.cos(zenith_angle)
+    Sd[(time < sunrise) | (time > sunset)] = 0
+
+    # The global solar radiation on a horizontal surface is the sum of the
+    # horizontal direct beam (Sb) and diffuse radiation (Sd).
+    St = Sb + Sd
+
+    # Check for never daylight northern latitudes.
+    St[St < 0] = 0
+
+    # Fill NaN values with zeros.
+    St[pd.isnull(St)] = 0
+
+    # Fill the output dataframe with the results.
+    dataframe['solar_rad_W/m2'] = np.round(St, 2)
+    dataframe['deltat_degC'] = deltaT
+    dataframe['tau'] = tau
+
+    return dataframe
 
 
 if __name__ == '__main__':
     climate_data = load_demo_climatedata()
-    solarcalc = calc_solar_rad(
+    solar_rad = calc_solar_rad(
         lon_dd=-76.4687209,
         lat_dd=56.5213541,
         alt=100,
         climate_data=climate_data)
-    solarcalc.to_csv('output_solarcalc_demo.csv')
-    print(solarcalc)
+    print(solar_rad)
