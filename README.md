@@ -37,7 +37,6 @@ pip install solarcalc
 
 ```
 >>> from solarcalc import load_demo_climatedata, calc_solar_rad
-
 >>> climate_data = load_demo_climatedata()
 >>> solarcalc = calc_solar_rad(
 >>>     lon_dd=-76.4687209,
