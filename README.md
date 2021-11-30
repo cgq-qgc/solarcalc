@@ -22,7 +22,7 @@ improvements and fixed some issues with the original code and method.
 
 ## Installation
 
-`SolarCalc` can be installed with `pip` by running:
+Install and update using [pip](https://pip.pypa.io/en/stable/getting-started/):
 
 ```commandlines
 pip install solarcalc
